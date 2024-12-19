@@ -57,14 +57,18 @@ async def turn_off(strip: SmartDevice) -> None:
         await plug.update()
 
 async def main_loop(target_strip: str, switch_on: bool) -> bool:
-    strip_found: SmartDevice = await init(target_strip)
-    if strip_found is None:
-        logger.error(f"ERROR, unable to find strip: {target_strip}")
+    try:
+        strip_found: SmartDevice = await init(target_strip)
+        if strip_found is None:
+            logger.error(f"ERROR, unable to find strip: {target_strip}")
+            return False
+        if switch_on:
+            await turn_on(strip_found)
+        else:
+            await turn_off(strip_found)
+    except e:
+        logger.error(f"main_loop error: {e}")
         return False
-    if switch_on:
-        await turn_on(strip_found)
-    else:
-        await turn_off(strip_found)
     return True
 
 def setup_logging_handlers(log_file: str) -> list:
