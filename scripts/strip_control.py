@@ -19,13 +19,21 @@ import signal
 import sys
 import inspect
 import bisect
+import time
 
 LOG_FILE = "strip_control.log"
 PLUG_SETTLE_TIME_SECS = 10
+BLINK_DELAY_SECS = 5
 
 log_file = LOG_FILE
 logger = None
 switch_on = False
+
+@dataclass
+class PlugState():
+    plug: SmartDevice
+    state: bool
+
 
 async def init(target_strip: str) -> SmartDevice:
     '''
@@ -56,12 +64,45 @@ async def turn_off(strip: SmartDevice) -> None:
         await plug.turn_off()
         await plug.update()
 
-async def main_loop(target_strip: str, switch_on: bool) -> bool:
+async def gather_state(strip: SmartDevice) -> list[PlugState]:
+    gathered_state: list[PlugState] = []
+    for plug in strip.children:
+        await plug.update()
+        gathered_state.append(PlugState(plug, plug.is_on))
+    return gathered_state
+
+async def restore_state(gathered_state: list[PlugState]) -> None:
+    for plug_state in gathered_state:
+        if plug_state.state:
+            await plug_state.plug.turn_on()
+        else:
+            await plug_state.plug.turn_off()
+        await plug_state.plug.update()
+
+async def blink(strip: SmartDevice, duration_minutes: int) -> None:
+    save_state = await gather_state(strip)
+    duration_seconds = duration_minutes * 60
+    start_time = time.time()
+    toggle: bool = True
+    while time.time() - start_time < duration_seconds:
+        if toggle:
+            await turn_on(strip)
+        else:
+            await turn_off(strip)
+        toggle = not toggle
+        await asyncio.sleep(BLINK_DELAY_SECS)
+    await restore_state(save_state)
+
+
+async def main_loop(target_strip: str, switch_on: bool, blink_minutes: int) -> bool:
     try:
         strip_found: SmartDevice = await init(target_strip)
         if strip_found is None:
             logger.error(f"ERROR, unable to find strip: {target_strip}")
             return False
+        if blink_minutes != None:
+            await blink(strip_found, blink_minutes)
+            return
         if switch_on:
             await turn_on(strip_found)
         else:
@@ -118,20 +159,26 @@ def init_argparse() -> argparse.ArgumentParser:
     )
     parser.add_argument('strip_name', help="TPLink Smart Strip Name")
     parser.add_argument('switch', help="TPLink Smart Strip Name")
+    parser.add_argument(
+        '-b', '--blink_mode', metavar='',
+        help='enables blink mode for arg minutes'
+    )
     return parser
 
 def main() -> None:
     global log_file, logger, switch_on
+    blink_minutes: int = None
     parser = init_argparse()
     args = parser.parse_args()
     if args.switch != None:
         switch = args.switch.lower()
         switch_on = (switch == "on")
-
+    if args.blink_mode != None:
+        blink_minutes = int(args.blink_mode)
     logger = init_logging(log_file)
 
     logger.info(f'>>>>> START strip: {args.strip_name} switch_on: {switch_on} <<<<<')
-    success = asyncio.run(main_loop(args.strip_name, switch_on))
+    success = asyncio.run(main_loop(args.strip_name, switch_on, blink_minutes))
     logger.info(f'>>>>> FINI strip: {args.strip_name}, status: {success} <<<<<')
 
 if __name__ == '__main__':
