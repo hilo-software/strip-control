@@ -102,7 +102,6 @@ async def main_loop(target_strip: str, switch_on: bool, blink_minutes: int) -> b
             return False
         if blink_minutes != None:
             await blink(strip_found, blink_minutes)
-            return
         if switch_on:
             await turn_on(strip_found)
         else:
