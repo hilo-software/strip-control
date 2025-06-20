@@ -160,7 +160,8 @@ def init_argparse() -> argparse.ArgumentParser:
     parser.add_argument('strip_name', help="TPLink Smart Strip Name")
     parser.add_argument('switch', help="TPLink Smart Strip Name")
     parser.add_argument(
-        '-b', '--blink_mode', metavar='',
+        '-b', '--blink_mode', 
+        action='store_true',
         help='enables blink mode for arg minutes'
     )
     return parser
