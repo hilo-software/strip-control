@@ -174,7 +174,7 @@ def main() -> None:
     if args.switch != None:
         switch = args.switch.lower()
         switch_on = (switch == "on")
-    if args.blink_mode != None:
+    if args.blink_mode != None and args.blink_mode:
         blink_minutes = int(args.blink_mode)
     logger = init_logging(log_file)
 
