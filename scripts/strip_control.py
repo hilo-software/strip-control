@@ -158,12 +158,8 @@ def init_argparse() -> argparse.ArgumentParser:
         description='Shut off TP-Link smart socket'
     )
     parser.add_argument('strip_name', help="TPLink Smart Strip Name")
-    parser.add_argument('switch', help="TPLink Smart Strip Name")
-    parser.add_argument(
-        '-b', '--blink_mode', 
-        action='store_true',
-        help='enables blink mode for arg minutes'
-    )
+    parser.add_argument('switch', help="State to set: 'on' or 'off'")
+    parser.add_argument('-b', '--blink_mode', type=int, help='Blink plug for specified number of minutes')
     return parser
 
 def main() -> None:
@@ -171,15 +167,12 @@ def main() -> None:
     blink_minutes: int = None
     parser = init_argparse()
     args = parser.parse_args()
-    if args.switch != None:
-        switch = args.switch.lower()
-        switch_on = (switch == "on")
-    if args.blink_mode != None and args.blink_mode:
-        blink_minutes = int(args.blink_mode)
+    switch = args.switch.lower()
+    switch_on = (switch == "on")
     logger = init_logging(log_file)
 
-    logger.info(f'>>>>> START strip: {args.strip_name} switch_on: {switch_on} <<<<<')
-    success = asyncio.run(main_loop(args.strip_name, switch_on, blink_minutes))
+    logger.info(f'>>>>> START strip: {args.strip_name} Switch ON: {switch_on}, Blink minutes: {args.blink_mode} <<<<<')
+    success = asyncio.run(main_loop(args.strip_name, switch_on, args.blink_mode))
     logger.info(f'>>>>> FINI strip: {args.strip_name}, status: {success} <<<<<')
 
 if __name__ == '__main__':

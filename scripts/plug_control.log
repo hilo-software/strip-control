@@ -1,0 +1,8 @@
+2025-07-04 10:12:19 - INFO - ==== Starting KP115 Control ====
+2025-07-04 10:12:19 - INFO - Plug name: bedroom_notifier_plug, Switch ON: False, Blink minutes: None
+2025-07-04 10:12:24 - INFO - Found device: alias=test01, model=KP115(US), is_strip=False
+2025-07-04 10:12:24 - INFO - Found device: alias=LivingRoomStrip, model=KP303(US), is_strip=True
+2025-07-04 10:12:26 - INFO - Found device: alias=TP-LINK_Power Strip_08FD, model=HS300(US), is_strip=True
+2025-07-04 10:12:26 - INFO - Found device: alias=bedroom_notifier_plug, model=KP115(US), is_strip=False
+2025-07-04 10:12:26 - INFO - Plug 'bedroom_notifier_plug' found.
+2025-07-04 10:12:26 - INFO - ==== Finished with status: True ====

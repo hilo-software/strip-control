@@ -137,7 +137,7 @@ def main() -> None:
     logger.info(f"==== Starting KP115 Control ====")
     logger.info(f"Plug name: {args.plug_name}, Switch ON: {switch_on}, Blink minutes: {args.blink_mode}")
     success = asyncio.run(main_loop(args.plug_name, switch_on, args.blink_mode))
-    logger.info(f"==== Finished with status: {success} ====")
+    logger.info(f"==== FINI plug: {args.plug_name}, status: {success} ====")
 
 if __name__ == '__main__':
     main()
